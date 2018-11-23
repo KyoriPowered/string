@@ -26,6 +26,8 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.function.IntPredicate;
+
 public class StringReaderImpl implements StringReader {
   protected final String string;
   protected int index;
@@ -103,9 +105,28 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
+  public @NonNull String peek(final @NonNull IntPredicate predicate) {
+    final int start = this.mark();
+    while(this.readable() && predicate.test(this.peek())) {
+      this.skip();
+    }
+    final int end = this.reset();
+    return this.string.substring(start, end);
+  }
+
+  @Override
   public char next() {
     this.assertReadable();
     return this.string.charAt(this.index++);
+  }
+
+  @Override
+  public @NonNull String next(final @NonNull IntPredicate predicate) {
+    final int start = this.index;
+    while(this.readable() && predicate.test(this.peek())) {
+      this.skip();
+    }
+    return this.string.substring(start, this.index);
   }
 
   @Override

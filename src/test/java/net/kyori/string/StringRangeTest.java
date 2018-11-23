@@ -27,9 +27,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StringRangeTest {
+  @Test
+  void testSanity() {
+    assertThrows(IndexOutOfBoundsException.class, () -> StringRange.between(-1, 0));
+    assertThrows(IndexOutOfBoundsException.class, () -> StringRange.between(0, -1));
+  }
+
   @Test
   void testFull() {
     final StringReader reader = StringReader.create("foo bar");

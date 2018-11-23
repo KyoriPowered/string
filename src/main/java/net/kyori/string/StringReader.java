@@ -153,12 +153,28 @@ public interface StringReader extends StringRepresentable {
   char peek(final int offset);
 
   /**
+   * Peeks at the next characters while {@code predicate} is satisfied.
+   *
+   * @param predicate the character predicate
+   * @return a string
+   */
+  @NonNull String peek(final @NonNull IntPredicate predicate);
+
+  /**
    * Gets the next character.
    *
    * @return the next character
    * @throws IndexOutOfBoundsException if there is no character available
    */
   char next();
+
+  /**
+   * Gets the next characters while {@code predicate} is satisfied.
+   *
+   * @param predicate the character predicate
+   * @return a string
+   */
+  @NonNull String next(final @NonNull IntPredicate predicate);
 
   /**
    * Creates a copy.
