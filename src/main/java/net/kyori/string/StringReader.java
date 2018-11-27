@@ -107,18 +107,36 @@ public interface StringReader extends StringReaderGetter {
      */
     @NonNegative int revert();
 
-    /**
-     * Gets a range of the {@link #index() marked} and {@link StringReader#index() current}.
-     *
-     * @return a range
-     */
-    @NonNull StringRange range();
+    @NonNull Mark skip(final @NonNull IntPredicate predicate);
 
     /**
-     * Gets the string between the {@link #index() marked} and {@link StringReader#index() current} positions.
+     * Keeps the string reader index at the {@link StringReader#index() current} position.
      *
-     * @return a string
+     * @return this mark
      */
-    @NonNull String string();
+    @NonNull Result retain();
+
+    /**
+     * Reverts the string reader index to the {@link #index() marked} position.
+     *
+     * @return this mark
+     */
+    @NonNull Result release();
+
+    interface Result {
+      /**
+       * Gets a range of the {@link #index() marked} and {@link StringReader#index() current}.
+       *
+       * @return a range
+       */
+      @NonNull StringRange range();
+
+      /**
+       * Gets the string between the {@link #index() marked} and {@link StringReader#index() current} positions.
+       *
+       * @return a string
+       */
+      @NonNull String string();
+    }
   }
 }

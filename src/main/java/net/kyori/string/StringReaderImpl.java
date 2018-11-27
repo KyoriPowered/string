@@ -135,24 +135,46 @@ public class StringReaderImpl implements StringReader {
     }
   }
 
-  class MarkImpl implements Mark {
-    final int index = StringReaderImpl.this.index;
+  class MarkImpl implements Mark, Mark.Result {
+    final int start = StringReaderImpl.this.index;
+    int end = -1;
 
     @Override
     public int index() {
-      return this.index;
+      return this.start;
     }
 
     @Override
     public int revert() {
       final int index = StringReaderImpl.this.index;
-      StringReaderImpl.this.index = this.index;
+      StringReaderImpl.this.index = this.start;
       return index;
     }
 
     @Override
+    public @NonNull Mark skip(final @NonNull IntPredicate predicate) {
+      while(StringReaderImpl.this.readable() && predicate.test(StringReaderImpl.this.peek())) {
+        StringReaderImpl.this.skip();
+      }
+      return this;
+    }
+
+    @Override
+    public @NonNull Result retain() {
+      this.end = StringReaderImpl.this.index;
+      return this;
+    }
+
+    @Override
+    public @NonNull Result release() {
+      this.end = StringReaderImpl.this.index;
+      StringReaderImpl.this.index = this.start;
+      return this;
+    }
+
+    @Override
     public @NonNull StringRange range() {
-      return StringRange.between(this.index, StringReaderImpl.this.index);
+      return StringRange.between(this.start, this.end);
     }
 
     @Override
