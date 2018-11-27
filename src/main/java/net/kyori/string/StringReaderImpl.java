@@ -31,13 +31,11 @@ import java.util.function.IntPredicate;
 public class StringReaderImpl implements StringReader {
   protected final String string;
   protected int index;
-  protected int marker;
 
   public StringReaderImpl(final @NonNull String string) {
     this.string = string;
   }
 
-  @SuppressWarnings("CopyConstructorMissesField")
   private StringReaderImpl(final @NonNull StringReaderImpl reader) {
     this.string = reader.string;
     this.index = reader.index;
@@ -79,17 +77,8 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
-  public @NonNegative int mark() {
-    final int index = this.index;
-    this.marker = index;
-    return index;
-  }
-
-  @Override
-  public @NonNegative int reset() {
-    final int index = this.index;
-    this.index = this.marker;
-    return index;
+  public @NonNull Mark mark() {
+    return new MarkImpl();
   }
 
   @Override
@@ -106,12 +95,12 @@ public class StringReaderImpl implements StringReader {
 
   @Override
   public @NonNull String peek(final @NonNull IntPredicate predicate) {
-    final int start = this.mark();
+    final Mark mark = this.mark();
     while(this.readable() && predicate.test(this.peek())) {
       this.skip();
     }
-    final int end = this.reset();
-    return this.string.substring(start, end);
+    final int end = mark.revert();
+    return this.string.substring(mark.index(), end);
   }
 
   @Override
@@ -143,6 +132,32 @@ public class StringReaderImpl implements StringReader {
   protected void assertOffsetReadable(final @NonNegative int offset) {
     if(!this.readable(offset)) {
       throw new StringIndexOutOfBoundsException(this.index + offset);
+    }
+  }
+
+  class MarkImpl implements Mark {
+    final int index = StringReaderImpl.this.index;
+
+    @Override
+    public int index() {
+      return this.index;
+    }
+
+    @Override
+    public int revert() {
+      final int index = StringReaderImpl.this.index;
+      StringReaderImpl.this.index = this.index;
+      return index;
+    }
+
+    @Override
+    public @NonNull StringRange range() {
+      return StringRange.between(this.index, StringReaderImpl.this.index);
+    }
+
+    @Override
+    public @NonNull String string() {
+      return StringReaderImpl.this.string(this.range());
     }
   }
 }

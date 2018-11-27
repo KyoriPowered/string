@@ -23,13 +23,12 @@
  */
 package net.kyori.string;
 
-import net.kyori.lambda.StringRepresentable;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.IntPredicate;
 
-public interface StringReader extends StringRepresentable {
+public interface StringReader extends StringReaderGetter {
   /**
    * Creates a new string reader.
    *
@@ -39,60 +38,6 @@ public interface StringReader extends StringRepresentable {
   static @NonNull StringReader create(final @NonNull String string) {
     return new StringReaderImpl(string);
   }
-
-  /**
-   * Gets the underlying string.
-   *
-   * @return the underlying string
-   */
-  @Override
-  @NonNull String asString();
-
-  /**
-   * Gets a substring of the underlying string in range of {@code range}.
-   *
-   * @param range the string range
-   * @return a string
-   */
-  @NonNull String string(final @NonNull StringRange range);
-
-  /**
-   * Gets the total length.
-   *
-   * @return the total length
-   */
-  @NonNegative int length();
-
-  /**
-   * Gets the remaining length.
-   *
-   * @return the remaining length
-   */
-  @NonNegative int remaining();
-
-  /**
-   * Gets the current index.
-   *
-   * @return the current index
-   */
-  @NonNegative int index();
-
-  /**
-   * Checks if a single character can be read.
-   *
-   * @return if a single character can be read
-   */
-  default boolean readable() {
-    return this.readable(1);
-  }
-
-  /**
-   * Checks if {@code length} characters can be read.
-   *
-   * @param length the number of characters
-   * @return if {@code length} characters can be read
-   */
-  boolean readable(final @NonNegative int length);
 
   /**
    * Skips a single character.
@@ -126,39 +71,7 @@ public interface StringReader extends StringRepresentable {
    *
    * @return the current index
    */
-  @NonNegative int mark();
-
-  /**
-   * Resets the index to the {@link #mark() marked} position.
-   *
-   * @return the index before reset
-   */
-  @NonNegative int reset();
-
-  /**
-   * Peeks at the next character.
-   *
-   * @return the next character
-   * @throws IndexOutOfBoundsException if there is no character available
-   */
-  char peek();
-
-  /**
-   * Peeks at the character at {@code index + offset}.
-   *
-   * @param offset the offset
-   * @return the next character
-   * @throws IndexOutOfBoundsException if there is no character available
-   */
-  char peek(final int offset);
-
-  /**
-   * Peeks at the next characters while {@code predicate} is satisfied.
-   *
-   * @param predicate the character predicate
-   * @return a string
-   */
-  @NonNull String peek(final @NonNull IntPredicate predicate);
+  @NonNull Mark mark();
 
   /**
    * Gets the next character.
@@ -177,9 +90,35 @@ public interface StringReader extends StringRepresentable {
   @NonNull String next(final @NonNull IntPredicate predicate);
 
   /**
-   * Creates a copy.
-   *
-   * @return a copy
+   * A mark.
    */
-  @NonNull StringReader copy();
+  interface Mark {
+    /**
+     * Gets the string reader index when the mark was created.
+     *
+     * @return the string reader index when the mark was created
+     */
+    @NonNegative int index();
+
+    /**
+     * Reverts the string reader index to the {@link #index() marked} position.
+     *
+     * @return the string reader index before revert
+     */
+    @NonNegative int revert();
+
+    /**
+     * Gets a range of the {@link #index() marked} and {@link StringReader#index() current}.
+     *
+     * @return a range
+     */
+    @NonNull StringRange range();
+
+    /**
+     * Gets the string between the {@link #index() marked} and {@link StringReader#index() current} positions.
+     *
+     * @return a string
+     */
+    @NonNull String string();
+  }
 }

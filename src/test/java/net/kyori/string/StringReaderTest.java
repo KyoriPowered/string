@@ -118,12 +118,16 @@ class StringReaderTest {
   void testMarkAndReset() {
     final StringReader reader = StringReader.create("foo bar");
     assertEquals('f', reader.next());
-    assertEquals(1, reader.mark());
+    final StringReader.Mark mark = reader.mark();
+    assertEquals(1, mark.index());
     for(int i = 0; i < 5; i++) {
       reader.skip();
     }
     assertEquals('r', reader.next());
-    assertEquals(7, reader.reset());
+    assertEquals(1, mark.range().start());
+    assertEquals(7, mark.range().end());
+    assertEquals("oo bar", mark.string());
+    assertEquals(7, mark.revert());
     assertEquals('o', reader.next());
     assertEquals('o', reader.next());
   }
