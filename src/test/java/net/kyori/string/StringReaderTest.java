@@ -75,6 +75,16 @@ class StringReaderTest {
   }
 
   @Test
+  void testIndex_set() {
+    final StringReader reader = StringReader.create("abc");
+    assertEquals(0, reader.index());
+    reader.skip(2);
+    assertEquals('c', reader.peek());
+    reader.index(1);
+    assertEquals('b', reader.peek());
+  }
+
+  @Test
   void testReadable() {
     final String string = "foo";
     final int length = string.length();
@@ -115,24 +125,6 @@ class StringReaderTest {
   }
 
   @Test
-  void testMarkAndReset() {
-    final StringReader reader = StringReader.create("foo bar");
-    assertEquals('f', reader.next());
-    final StringReader.Mark mark = reader.mark();
-    assertEquals(1, mark.index());
-    for(int i = 0; i < 5; i++) {
-      reader.skip();
-    }
-    assertEquals('r', reader.next());
-    assertEquals(1, mark.range().start());
-    assertEquals(7, mark.range().end());
-    assertEquals("oo bar", mark.string());
-    assertEquals(7, mark.revert());
-    assertEquals('o', reader.next());
-    assertEquals('o', reader.next());
-  }
-
-  @Test
   void testPeek() {
     final StringReader reader = StringReader.create("foo");
     assertEquals('f', reader.peek());
@@ -146,13 +138,6 @@ class StringReaderTest {
   void testPeekTooFar() {
     assertThrows(IndexOutOfBoundsException.class, StringReader.create("")::peek);
     assertThrows(IndexOutOfBoundsException.class, () -> StringReader.create("foo").peek(4));
-  }
-
-  @Test
-  void testPeekWhile() {
-    final StringReader reader = StringReader.create("foo bar");
-    assertEquals("foo", reader.peek(character -> !Character.isWhitespace(character)));
-    assertEquals('f', reader.peek()); // we peeked above, we should be at the beginning
   }
 
   @Test
@@ -181,14 +166,5 @@ class StringReaderTest {
     final StringReader b = a.copy();
     assertEquals('o', b.next());
     assertEquals(2, a.remaining());
-  }
-
-  @Test
-  void testNextWhile() {
-    final StringReader reader = StringReader.create("foo bar");
-    assertEquals("foo", reader.next(character -> !Character.isWhitespace(character)));
-    assertEquals(' ', reader.next());
-    assertEquals('b', reader.next());
-    reader.next(); reader.next();
   }
 }

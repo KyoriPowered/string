@@ -26,7 +26,6 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 public interface StringReader extends StringReaderGetter {
@@ -39,6 +38,14 @@ public interface StringReader extends StringReaderGetter {
   static @NonNull StringReader create(final @NonNull String string) {
     return new StringReaderImpl(string);
   }
+
+  /**
+   * Sets the index.
+   *
+   * @param index the new index
+   * @return the old index
+   */
+  @NonNegative int index(final @NonNegative int index);
 
   /**
    * Skips a single character.
@@ -74,54 +81,4 @@ public interface StringReader extends StringReaderGetter {
    * @throws IndexOutOfBoundsException if there is no character available
    */
   char next();
-
-  /**
-   * Creates a mark.
-   *
-   * @return a mark
-   */
-  @NonNull Mark mark();
-
-  /**
-   * A mark captures the index of the string reader is was created from at the time of creation, and
-   * allows {@link Mark#restoreIndex() restoring} the captured index to the string reader after any
-   * operation to the string reader has been made.
-   */
-  interface Mark {
-    /**
-     * Gets the string reader index when the mark was created.
-     *
-     * @return the string reader index when the mark was created
-     */
-    @NonNegative int start();
-
-    /**
-     * Apply {@code consumer} to the string reader.
-     *
-     * @param consumer the reader consumer
-     * @return this mark
-     */
-    @NonNull Mark with(final @NonNull Consumer<StringReader> consumer);
-
-    /**
-     * Restores the string reader index to the index captured when the mark was created.
-     *
-     * @return this mark
-     */
-    @NonNull Mark restoreIndex();
-
-    /**
-     * Gets a range of the {@link #start() start} and {@link StringReader#index() current}.
-     *
-     * @return a range
-     */
-    @NonNull StringRange range();
-
-    /**
-     * Gets the string between the {@link #start() start} and {@link StringReader#index() current} positions.
-     *
-     * @return a string
-     */
-    @NonNull String string();
-  }
 }

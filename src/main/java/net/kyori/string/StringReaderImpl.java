@@ -26,8 +26,6 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.Consumer;
-
 public class StringReaderImpl implements StringReader {
   protected final String string;
   protected int index;
@@ -67,6 +65,13 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
+  public @NonNegative int index(@NonNegative final int newIndex) {
+    final int oldIndex = this.index;
+    this.index = newIndex;
+    return oldIndex;
+  }
+
+  @Override
   public boolean readable(final @NonNegative int length) {
     return this.index + length <= this.string.length();
   }
@@ -95,11 +100,6 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
-  public @NonNull Mark mark() {
-    return new StringReaderMarkImpl();
-  }
-
-  @Override
   public @NonNull StringReader copy() {
     return new StringReaderImpl(this);
   }
@@ -113,48 +113,6 @@ public class StringReaderImpl implements StringReader {
   protected void assertOffsetReadable(final @NonNegative int offset) {
     if(!this.readable(offset)) {
       throw new StringIndexOutOfBoundsException(this.index + offset);
-    }
-  }
-
-  private class StringReaderMarkImpl implements Mark {
-    private static final int STILL_ALIVE = -1;
-    private final int start = StringReaderImpl.this.index;
-    private int end = STILL_ALIVE;
-
-    @Override
-    public @NonNegative int start() {
-      return this.start;
-    }
-
-    @Override
-    public @NonNull Mark with(final @NonNull Consumer<StringReader> reader) {
-      reader.accept(StringReaderImpl.this);
-      return this;
-    }
-
-    @Override
-    public @NonNull Mark restoreIndex() {
-      if(this.end == STILL_ALIVE) {
-        this.end = StringReaderImpl.this.index;
-        StringReaderImpl.this.index = this.start;
-      }
-      return this;
-    }
-
-    @Override
-    public @NonNull StringRange range() {
-      final int end;
-      if(this.end != STILL_ALIVE) {
-        end = this.end;
-      } else {
-        end = StringReaderImpl.this.index;
-      }
-      return StringRange.between(this.start, end);
-    }
-
-    @Override
-    public @NonNull String string() {
-      return StringReaderImpl.this.string(this.range());
     }
   }
 }
