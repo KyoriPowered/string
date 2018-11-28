@@ -26,6 +26,7 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 public interface StringReader extends StringReaderGetter {
@@ -67,13 +68,6 @@ public interface StringReader extends StringReaderGetter {
   }
 
   /**
-   * Marks the current index.
-   *
-   * @return the current index
-   */
-  @NonNull Mark mark();
-
-  /**
    * Gets the next character.
    *
    * @return the next character
@@ -82,15 +76,16 @@ public interface StringReader extends StringReaderGetter {
   char next();
 
   /**
-   * Gets the next characters while {@code predicate} is satisfied.
+   * Creates a mark.
    *
-   * @param predicate the character predicate
-   * @return a string
+   * @return a mark
    */
-  @NonNull String next(final @NonNull IntPredicate predicate);
+  @NonNull Mark mark();
 
   /**
-   * A mark.
+   * A mark captures the index of the string reader is was created from at the time of creation, and
+   * allows {@link Mark#restoreIndex() restoring} the captured index to the string reader after any
+   * operation to the string reader has been made.
    */
   interface Mark {
     /**
@@ -98,45 +93,35 @@ public interface StringReader extends StringReaderGetter {
      *
      * @return the string reader index when the mark was created
      */
-    @NonNegative int index();
+    @NonNegative int start();
 
     /**
-     * Reverts the string reader index to the {@link #index() marked} position.
+     * Apply {@code consumer} to the string reader.
      *
-     * @return the string reader index before revert
+     * @param consumer the reader consumer
+     * @return this mark
      */
-    @NonNegative int revert();
-
-    @NonNull Mark skip(final @NonNull IntPredicate predicate);
+    @NonNull Mark with(final @NonNull Consumer<StringReader> consumer);
 
     /**
-     * Keeps the string reader index at the {@link StringReader#index() current} position.
+     * Restores the string reader index to the index captured when the mark was created.
      *
      * @return this mark
      */
-    @NonNull Result retain();
+    @NonNull Mark restoreIndex();
 
     /**
-     * Reverts the string reader index to the {@link #index() marked} position.
+     * Gets a range of the {@link #start() start} and {@link StringReader#index() current}.
      *
-     * @return this mark
+     * @return a range
      */
-    @NonNull Result release();
+    @NonNull StringRange range();
 
-    interface Result {
-      /**
-       * Gets a range of the {@link #index() marked} and {@link StringReader#index() current}.
-       *
-       * @return a range
-       */
-      @NonNull StringRange range();
-
-      /**
-       * Gets the string between the {@link #index() marked} and {@link StringReader#index() current} positions.
-       *
-       * @return a string
-       */
-      @NonNull String string();
-    }
+    /**
+     * Gets the string between the {@link #start() start} and {@link StringReader#index() current} positions.
+     *
+     * @return a string
+     */
+    @NonNull String string();
   }
 }

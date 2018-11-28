@@ -27,8 +27,6 @@ import net.kyori.lambda.StringRepresentable;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.IntPredicate;
-
 public interface StringReaderGetter extends StringRepresentable {
   /**
    * Gets the underlying string.
@@ -100,14 +98,6 @@ public interface StringReaderGetter extends StringRepresentable {
    * @throws IndexOutOfBoundsException if there is no character available
    */
   char peek(final int offset);
-
-  /**
-   * Peeks at the next characters while {@code predicate} is satisfied.
-   *
-   * @param predicate the character predicate
-   * @return a string
-   */
-  @NonNull String peek(final @NonNull IntPredicate predicate);
 
   /**
    * Creates a copy.

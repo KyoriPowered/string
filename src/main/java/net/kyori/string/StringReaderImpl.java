@@ -26,7 +26,7 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.IntPredicate;
+import java.util.function.Consumer;
 
 public class StringReaderImpl implements StringReader {
   protected final String string;
@@ -77,11 +77,6 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
-  public @NonNull Mark mark() {
-    return new MarkImpl();
-  }
-
-  @Override
   public char peek() {
     this.assertReadable();
     return this.string.charAt(this.index);
@@ -94,28 +89,14 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
-  public @NonNull String peek(final @NonNull IntPredicate predicate) {
-    final Mark mark = this.mark();
-    while(this.readable() && predicate.test(this.peek())) {
-      this.skip();
-    }
-    final int end = mark.revert();
-    return this.string.substring(mark.index(), end);
-  }
-
-  @Override
   public char next() {
     this.assertReadable();
     return this.string.charAt(this.index++);
   }
 
   @Override
-  public @NonNull String next(final @NonNull IntPredicate predicate) {
-    final int start = this.index;
-    while(this.readable() && predicate.test(this.peek())) {
-      this.skip();
-    }
-    return this.string.substring(start, this.index);
+  public @NonNull Mark mark() {
+    return new StringReaderMarkImpl();
   }
 
   @Override
@@ -135,46 +116,40 @@ public class StringReaderImpl implements StringReader {
     }
   }
 
-  class MarkImpl implements Mark, Mark.Result {
-    final int start = StringReaderImpl.this.index;
-    int end = -1;
+  private class StringReaderMarkImpl implements Mark {
+    private static final int STILL_ALIVE = -1;
+    private final int start = StringReaderImpl.this.index;
+    private int end = STILL_ALIVE;
 
     @Override
-    public int index() {
+    public @NonNegative int start() {
       return this.start;
     }
 
     @Override
-    public int revert() {
-      final int index = StringReaderImpl.this.index;
-      StringReaderImpl.this.index = this.start;
-      return index;
+    public @NonNull Mark with(final @NonNull Consumer<StringReader> reader) {
+      reader.accept(StringReaderImpl.this);
+      return this;
     }
 
     @Override
-    public @NonNull Mark skip(final @NonNull IntPredicate predicate) {
-      while(StringReaderImpl.this.readable() && predicate.test(StringReaderImpl.this.peek())) {
-        StringReaderImpl.this.skip();
+    public @NonNull Mark restoreIndex() {
+      if(this.end == STILL_ALIVE) {
+        this.end = StringReaderImpl.this.index;
+        StringReaderImpl.this.index = this.start;
       }
       return this;
     }
 
     @Override
-    public @NonNull Result retain() {
-      this.end = StringReaderImpl.this.index;
-      return this;
-    }
-
-    @Override
-    public @NonNull Result release() {
-      this.end = StringReaderImpl.this.index;
-      StringReaderImpl.this.index = this.start;
-      return this;
-    }
-
-    @Override
     public @NonNull StringRange range() {
-      return StringRange.between(this.start, this.end);
+      final int end;
+      if(this.end != STILL_ALIVE) {
+        end = this.end;
+      } else {
+        end = StringReaderImpl.this.index;
+      }
+      return StringRange.between(this.start, end);
     }
 
     @Override
