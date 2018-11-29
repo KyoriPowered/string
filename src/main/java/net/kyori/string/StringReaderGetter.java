@@ -37,12 +37,23 @@ public interface StringReaderGetter extends StringRepresentable {
   @NonNull String asString();
 
   /**
+   * Gets a substring of the underlying string in range of {@code start} to {@code end}.
+   *
+   * @param start the start index
+   * @param end the end index
+   * @return a string
+   */
+  @NonNull String string(final @NonNegative int start, final @NonNegative int end);
+
+  /**
    * Gets a substring of the underlying string in range of {@code range}.
    *
    * @param range the string range
    * @return a string
    */
-  @NonNull String string(final @NonNull StringRange range);
+  default @NonNull String string(final @NonNull StringRange range) {
+    return this.string(range.start(), range.end());
+  }
 
   /**
    * Gets the total length.

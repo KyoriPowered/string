@@ -45,8 +45,8 @@ public class StringReaderImpl implements StringReader {
   }
 
   @Override
-  public @NonNull String string(final @NonNull StringRange range) {
-    return this.string.substring(range.start(), range.end());
+  public @NonNull String string(@NonNegative final int start, @NonNegative final int end) {
+    return this.string.substring(start, end);
   }
 
   @Override
