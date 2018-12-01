@@ -26,6 +26,8 @@ package net.kyori.string;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
+
 /* package */ final class StringRangeImpl implements StringRange {
   private final int start;
   private final int end;
@@ -60,5 +62,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
   @Override
   public @NonNull StringRange expand(final @NonNull StringRange that) {
     return new StringRangeImpl(Math.min(this.start(), that.start()), Math.max(this.end(), that.end()));
+  }
+
+  @Override
+  public boolean equals(final Object other) {
+    if(this == other) return true;
+    if(!(other instanceof StringRange)) return false;
+    final StringRange that = (StringRange) other;
+    return this.start == that.start() && this.end == that.end();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.start, this.end);
   }
 }

@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -74,5 +75,17 @@ class StringRangeTest {
     final StringRange range = StringRange.between(0, 3).expand(StringRange.between(1, 6));
     assertEquals(0, range.start());
     assertEquals(6, range.end());
+  }
+
+  @Test
+  void testEquals() {
+    assertEquals(StringRange.between(1, 4), StringRange.between(1, 4));
+    assertNotEquals(StringRange.between(1, 5), StringRange.between(1, 4));
+  }
+
+  @Test
+  void testHashCode() {
+    assertEquals(StringRange.between(1, 4).hashCode(), StringRange.between(1, 4).hashCode());
+    assertNotEquals(StringRange.between(1, 5).hashCode(), StringRange.between(1, 4).hashCode());
   }
 }
